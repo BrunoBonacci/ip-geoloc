@@ -9,15 +9,15 @@
 
 
 (defn full-geo-lookup [provider ip]
-  (mmind/full-geo-lookup prvd ip))
+  (mmind/full-geo-lookup provider ip))
 
 
 (defn coordinates [provider ip]
-  (mmind/coordinates prvd ip))
+  (mmind/coordinates provider ip))
 
 
 (defn geo-lookup [provider ip]
-  (mmind/geo-lookup prvd ip))
+  (mmind/geo-lookup provider ip))
 
 
 
@@ -25,9 +25,10 @@
 
   (def ip1 "220.181.108.182")
   (def ip2 "104.131.115.133")
+  (def ip3 "23.232.137.112")
 
   (def file "/tmp/GeoLite2-City.mmdb")
 
   (def prvd (init-provider :max-mind2 file))
 
-  (geo-lookup prvd "23.232.137.112"))
+  (geo-lookup prvd ip3))
