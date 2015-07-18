@@ -9,8 +9,7 @@ and it is distributed under [Creative Commons Attribution-ShareAlike 3.0 Unporte
 
 To meet the attribution license requirements please include this in your product/project.
 
-`This product includes GeoLite2 data created by MaxMind, available from
-<a href="http://www.maxmind.com">http://www.maxmind.com</a>.`
+> **This product includes GeoLite2 data created by MaxMind, available from [http://www.maxmind.com](http://www.maxmind.com)**.
 
 It supports the following feature:
 
