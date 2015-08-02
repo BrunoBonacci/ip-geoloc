@@ -31,4 +31,7 @@
 
   (def prvd (init-provider :max-mind2 file))
 
-  (geo-lookup prvd ip3))
+  (geo-lookup prvd ip1)
+  (geo-lookup prvd ip2)
+  (geo-lookup prvd ip3)
+  )
