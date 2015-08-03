@@ -17,6 +17,7 @@ It supports the following feature:
   * IPv4 and IPv6 support
   * 3 levels of output details: just lat/lng coordinates, concise, full.
   * Simplified database update
+  * Fully automated database update
   * caching of common IPs
 
 ## Usage

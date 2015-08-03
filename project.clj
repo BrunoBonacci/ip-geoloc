@@ -6,7 +6,9 @@
             :url "http://www.apache.org/licenses/LICENSE-2.0"}
 
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [com.maxmind.geoip2/geoip2 "2.3.1"]]
+                 [com.maxmind.geoip2/geoip2 "2.3.1"]
+                 [clj-http "1.1.2"]
+                 [pandect "0.5.2"]]
 
   :deploy-repositories [["clojars" {:url "https://clojars.org/repo/"
                                     :sign-releases false}]])

@@ -27,7 +27,7 @@
   (def ip2 "104.131.115.133")
   (def ip3 "23.232.137.112")
 
-  (def file "/tmp/GeoLite2-City.mmdb")
+  (def file "/tmp/GeoLite2-City.mmdb.gz")
 
   (def prvd (init-provider :max-mind2 file))
 

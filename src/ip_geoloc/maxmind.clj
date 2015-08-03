@@ -1,9 +1,18 @@
 (ns ip-geoloc.maxmind
   (:require [clojure.java.io :as io])
+  (:require [pandect.algo.md5 :as hash])
+  (:require [clj-http.client :as http])
   (:import  [com.maxmind.geoip2 DatabaseReader DatabaseReader$Builder]
             [com.maxmind.geoip2.model CityResponse]
             [com.maxmind.geoip2.record City Country Subdivision
              Postal Location Continent RepresentedCountry Traits]))
+
+
+
+
+
+(def ^:dynamic *database-url* "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz")
+(def ^:dynamic *database-md5-url* "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.md5")
 
 
 (defprotocol ToClojure
@@ -117,7 +126,11 @@
   GeoIpProvider
 
   (init [this]
-    (MaxMind2. db-path (.build (DatabaseReader$Builder. (io/file db-path)))))
+    (let [db (if (.endsWith db-path ".gz")
+               (java.util.zip.GZIPInputStream.
+                (io/input-stream db-path))
+               (io/input-stream db-path))]
+      (MaxMind2. db-path (.build (DatabaseReader$Builder. db)))))
 
   (full-geo-lookup [this ip]
     (->clojure (.city db (java.net.InetAddress/getByName ip))))
@@ -141,3 +154,21 @@
 
   (coordinates [this ip]
     (->clojure (.getLocation (.city db (java.net.InetAddress/getByName ip))))))
+
+
+
+(defn- gunzip-file [in out]
+  (with-open [input (java.util.zip.GZIPInputStream.
+                     (io/input-stream  (io/file in)))
+              output (io/output-stream (io/file out))]
+    (io/copy input output)))
+
+
+(comment
+  (gunzip-file "/tmp/GeoLite2-City.mmdb.gz" "/tmp/GeoLite2-City.mmdb")
+
+  (slurp (:body (http/get *database-md5-url* {:as :stream})))
+
+  (hash/md5-file "/tmp/GeoLite2-City.mmdb")
+  ;; "bceba8f51a577d7f8c9801853759fd3c"
+  )
