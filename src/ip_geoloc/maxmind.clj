@@ -156,7 +156,6 @@
     (->clojure (.getLocation (.city db (java.net.InetAddress/getByName ip))))))
 
 
-
 (defn- gunzip-file [in out]
   (with-open [input (java.util.zip.GZIPInputStream.
                      (io/input-stream  (io/file in)))
@@ -164,11 +163,42 @@
     (io/copy input output)))
 
 
+(defn- ensure-dirs [path]
+  (.mkdirs (.getParentFile (io/file path))))
+
+
+(defn download-db [from to]
+  (ensure-dirs to)
+  (io/copy
+   (:body (http/get from {:as :stream}))
+   (io/file to)))
+
+
+(defn check-db [md5 file]
+  (= md5 (hash/md5-file file)))
+
+
+(defn fetch-db-md5 [url]
+  (:body (http/get url {:as :text})))
+
+
+(defn update-db [{:keys [database-url database-md5-url database-folder]}]
+  (let [dbgz (io/file database-folder "GeoLite2-City.mmdb.gz")
+        db   (io/file database-folder "GeoLite2-City.mmdb")]
+    (download-db database-url dbgz)
+    (gunzip-file dbgz db)
+    (check-db (fetch-db-md5 database-md5-url) db)))
+
 (comment
+
+  (download-db *database-url* "/tmp/GeoLite2-City.mmdb.gz")
   (gunzip-file "/tmp/GeoLite2-City.mmdb.gz" "/tmp/GeoLite2-City.mmdb")
 
-  (slurp (:body (http/get *database-md5-url* {:as :stream})))
+  (check-db
+   (fetch-db-md5 *database-md5-url*)
+   "/tmp/GeoLite2-City.mmdb")
 
-  (hash/md5-file "/tmp/GeoLite2-City.mmdb")
-  ;; "bceba8f51a577d7f8c9801853759fd3c"
+  (update-db {:database-url *database-url*
+              :database-md5-url *database-md5-url*
+              :database-folder  "/tmp/dir1"})
   )
