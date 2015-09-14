@@ -1,23 +1,56 @@
 (ns ip-geoloc.core
-  (:require [ip-geoloc.maxmind :as mmind])
+  (:require [com.stuartsierra.component :refer [start stop] :as component]
+            [ip-geoloc.maxmind :as mmind])
   (:import [ip_geoloc.maxmind MaxMind2]))
 
 
-(defn init-provider [type db-file]
-  (case type
-    :max-mind2 (mmind/init (MaxMind2. db-file nil))))
+(def ^:dynamic *provider* nil)
 
 
-(defn full-geo-lookup [provider ip]
+(defrecord Provider [db-file]
+  component/Lifecycle
+
+  (start [this]
+    (if (:provider this)
+      this
+      (assoc this :provider (mmind/init (MaxMind2. db-file nil?)))))
+
+  (stop [this]
+    (if (:provider this)
+      (let [provider (:provider this)
+            _ (mmind/close provider)]
+        (dissoc this :provider))
+      this)))
+
+
+(defn full-geo-lookup [{:keys [provider]} ip]
   (mmind/full-geo-lookup provider ip))
 
 
-(defn coordinates [provider ip]
+(defn coordinates [{:keys [provider]} ip]
   (mmind/coordinates provider ip))
 
 
-(defn geo-lookup [provider ip]
+(defn geo-lookup [{:keys [provider]} ip]
   (mmind/geo-lookup provider ip))
+
+
+(defn create-provider [config]
+  (map->Provider config))
+
+
+(defn init-provider! [config]
+  (alter-var-root #'*provider* (constantly (create-provider config))))
+
+
+(defn start-provider! [config]
+  (alter-var-root #'*provider*
+                  (constantly (start *provider*))))
+
+
+(defn stop-provider! [config]
+  (alter-var-root #'*provider*
+                  (constantly (stop *provider*))))
 
 
 
@@ -27,11 +60,14 @@
   (def ip2 "104.131.115.133")
   (def ip3 "23.232.137.112")
 
-  (def file "/tmp/GeoLite2-City.mmdb.gz")
+  (def prvd (create-provider {:db-file "/tmp/dir2/GeoLite2-City.mmdb"}))
 
-  (def prvd (init-provider :max-mind2 file))
+  (def prvd (start prvd))
 
   (geo-lookup prvd ip1)
   (geo-lookup prvd ip2)
   (geo-lookup prvd ip3)
+
+  (def prvd (stop prvd))
+
   )

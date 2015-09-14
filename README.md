@@ -1,5 +1,7 @@
 # ip-geoloc
 
+**WORK IN PROGRESS**
+
 A Clojure library for IP geo-location.
 
 It wraps the MaxMind GeoLite2 and provide support for different levels of resolution.

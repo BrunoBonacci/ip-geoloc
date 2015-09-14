@@ -111,6 +111,9 @@
   (init [this]
     "Initialise the provider")
 
+  (close [this]
+    "Close the provider")
+
   (full-geo-lookup [this ip]
     "Get a full geo IP lookup")
 
@@ -131,6 +134,10 @@
                 (io/input-stream db-path))
                (io/input-stream db-path))]
       (MaxMind2. db-path (.build (DatabaseReader$Builder. db)))))
+
+  (close [this]
+    (.close db)
+    nil)
 
   (full-geo-lookup [this ip]
     (->clojure (.city db (java.net.InetAddress/getByName ip))))
@@ -200,5 +207,5 @@
 
   (update-db {:database-url *database-url*
               :database-md5-url *database-md5-url*
-              :database-folder  "/tmp/dir1"})
+              :database-folder  "/tmp/dir2"})
   )
