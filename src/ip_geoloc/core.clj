@@ -10,15 +10,15 @@
 (defrecord Provider [db-file]
   component/Lifecycle
 
-  (start [this]
-    (if (:provider this)
+  (start [{:keys [provider] :as this}]
+    (if provider
       this
       (assoc this :provider (mmind/init (MaxMind2. db-file nil?)))))
 
-  (stop [this]
-    (if (:provider this)
-      (let [provider (:provider this)
-            _ (mmind/close provider)]
+  (stop [{:keys [provider] :as this}]
+    (if provider
+      (do
+        (mmind/close provider)
         (dissoc this :provider))
       this)))
 
