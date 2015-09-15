@@ -2,14 +2,11 @@
   (:require [clojure.java.io :as io])
   (:require [pandect.algo.md5 :as hash])
   (:require [clj-http.client :as http])
-  (:import  [com.maxmind.geoip2 DatabaseReader DatabaseReader$Builder]
-            [com.maxmind.geoip2.model CityResponse]
-            [com.maxmind.geoip2.record City Country Subdivision
-             Postal Location Continent RepresentedCountry Traits]))
-
-
-
-
+  (:import com.maxmind.geoip2.DatabaseReader$Builder
+           com.maxmind.geoip2.exception.AddressNotFoundException
+           com.maxmind.geoip2.model.CityResponse
+           [com.maxmind.geoip2.record City Continent
+            Country Location Postal RepresentedCountry Subdivision Traits]))
 
 (def ^:dynamic *database-url* "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz")
 (def ^:dynamic *database-md5-url* "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.md5")
@@ -124,6 +121,13 @@
     "get only coordinates info."))
 
 
+(defmacro if-ip-exists [& body]
+  `(try
+     ~@body
+     (catch AddressNotFoundException x#
+       nil)))
+
+
 (deftype MaxMind2 [db-path db]
 
   GeoIpProvider
@@ -140,27 +144,29 @@
     nil)
 
   (full-geo-lookup [this ip]
-    (->clojure (.city db (java.net.InetAddress/getByName ip))))
+    (if-ip-exists (->clojure (.city db (java.net.InetAddress/getByName ip)))))
 
   (geo-lookup [this ip]
-    (let [data (.city db (java.net.InetAddress/getByName ip))
-          continent (->clojure (.getContinent data))
-          country   (->clojure (.getCountry data))
-          subdivs   (apply vector (map :name (->clojure (.getSubdivisions data))))
-          city      (->clojure (.getCity data))
-          postal    (->clojure (.getPostal data))
-          location  (->clojure (.getLocation data))]
-      {:continent (:code continent)
-       :countryIsoCode (:isoCode country)
-       :country (:name country)
-       :subdivistions subdivs
-       :city (:name city)
-       :postCode (:code postal)
-       :latitude (:latitude location)
-       :longitude (:longitude location)}))
+    (when-let [data (if-ip-exists (.city db (java.net.InetAddress/getByName ip)))]
+      (let [continent (->clojure (.getContinent data))
+            country   (->clojure (.getCountry data))
+            subdivs   (apply vector (map :name (->clojure (.getSubdivisions data))))
+            city      (->clojure (.getCity data))
+            postal    (->clojure (.getPostal data))
+            location  (->clojure (.getLocation data))]
+        {:continent (:code continent)
+         :countryIsoCode (:isoCode country)
+         :country (:name country)
+         :subdivistions subdivs
+         :city (:name city)
+         :postCode (:code postal)
+         :latitude (:latitude location)
+         :longitude (:longitude location)})))
 
   (coordinates [this ip]
-    (->clojure (.getLocation (.city db (java.net.InetAddress/getByName ip))))))
+    (if-ip-exisits
+     (->clojure
+      (.getLocation (.city db (java.net.InetAddress/getByName ip)))))))
 
 
 (defn- gunzip-file [in out]
