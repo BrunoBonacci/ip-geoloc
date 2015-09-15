@@ -13,7 +13,7 @@
   (start [{:keys [provider] :as this}]
     (if provider
       this
-      (assoc this :provider (mmind/init (MaxMind2. db-file nil?)))))
+      (assoc this :provider (mmind/init (MaxMind2. db-file nil)))))
 
   (stop [{:keys [provider] :as this}]
     (if provider
@@ -21,18 +21,6 @@
         (mmind/close provider)
         (dissoc this :provider))
       this)))
-
-
-(defn full-geo-lookup [{:keys [provider]} ip]
-  (mmind/full-geo-lookup provider ip))
-
-
-(defn coordinates [{:keys [provider]} ip]
-  (mmind/coordinates provider ip))
-
-
-(defn geo-lookup [{:keys [provider]} ip]
-  (mmind/geo-lookup provider ip))
 
 
 (defn create-provider [config]
@@ -52,6 +40,25 @@
   (alter-var-root #'*provider*
                   (constantly (stop *provider*))))
 
+(defn full-geo-lookup
+  ([ip]
+   (full-geo-lookup *provider* ip))
+  ([{:keys [provider]} ip]
+   (mmind/full-geo-lookup provider ip)))
+
+
+(defn coordinates
+  ([ip]
+   (coordinates *provider* ip))
+  ([{:keys [provider]} ip]
+   (mmind/coordinates provider ip)))
+
+
+(defn geo-lookup
+  ([ip]
+   (geo-lookup *provider* ip))
+  ([{:keys [provider]} ip]
+   (mmind/geo-lookup provider ip)))
 
 
 (comment
