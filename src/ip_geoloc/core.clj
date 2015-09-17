@@ -31,12 +31,12 @@
   (alter-var-root #'*provider* (constantly (create-provider config))))
 
 
-(defn start-provider! [config]
+(defn start-provider! []
   (alter-var-root #'*provider*
                   (constantly (start *provider*))))
 
 
-(defn stop-provider! [config]
+(defn stop-provider! []
   (alter-var-root #'*provider*
                   (constantly (stop *provider*))))
 

@@ -164,7 +164,7 @@
          :longitude (:longitude location)})))
 
   (coordinates [this ip]
-    (if-ip-exisits
+    (if-ip-exists
      (->clojure
       (.getLocation (.city db (java.net.InetAddress/getByName ip)))))))
 
