@@ -177,7 +177,8 @@ You can also use the convenience functions which use the global `*provider*`.
 
 The provider is initialized with
 [Stuart Sierra's Component](https://github.com/stuartsierra/component)
-library, therefore if you want you can include the provider component in your system map:
+library, therefore if you want you can include the provider component
+in your system map:
 
 ```Clojure
 (defn your-system [config-options]

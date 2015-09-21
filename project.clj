@@ -9,7 +9,8 @@
                  [com.maxmind.geoip2/geoip2 "2.3.1"]
                  [clj-http "1.1.2"]
                  [pandect "0.5.2"]
-                 [com.stuartsierra/component "0.2.3"]]
+                 [com.stuartsierra/component "0.2.3"]
+                 [com.brunobonacci/safely "0.1.0-SNAPSHOT"]]
 
   :deploy-repositories [["clojars" {:url "https://clojars.org/repo/"
                                     :sign-releases false}]])
