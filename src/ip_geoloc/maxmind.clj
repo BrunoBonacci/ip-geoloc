@@ -11,7 +11,16 @@
 
 (def ^:dynamic *database-url* "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz")
 (def ^:dynamic *database-md5-url* "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.md5")
-
+(def defaults
+  {:database-file nil
+   :database-folder "/tmp/maxmind"
+   :auto-update true
+   :auto-update-check-time (* 3 60 60 1000) ;; 3 hours
+   :provider (atom nil)
+   :update-thread (atom nil)
+   :database-url *database-url*
+   :database-md5-url *database-md5-url*
+   })
 
 (defprotocol ToClojure
   (->clojure [data] "convert a given object into a Clojure data structure"))
@@ -219,16 +228,19 @@
       (do
         (let [newdb (io/file (str (.getAbsolutePath db) ".ok"))]
           (.renameTo db newdb)
+          (safely (.delete dbgz) :on-error :default nil)
           newdb))
-      (safely (.delete db) :on-error :ignore true))))
+      (safely (.delete db) :on-error :default nil))))
 
 
 (defn find-last-available-db [{:keys [database-folder]}]
-  (->> (io/file database-folder)
-       (.list)
-       (filter #(re-matches #"GeoLite2-City\.mmdb\.\d+\.ok" %))
-       (sort)
-       (last)))
+  (some->> (io/file database-folder)
+           (.list)
+           (filter #(re-matches #"GeoLite2-City\.mmdb\.\d+\.ok" %))
+           (sort)
+           (last)
+           (io/file database-folder)))
+
 
 
 (defn update-db-if-needed [current-db-file
@@ -237,14 +249,6 @@
   (when-not (check-db (fetch-db-md5 database-md5-url) current-db-file)
     (update-db cfg)))
 
-
-(comment
-  {:database-file nil
-   :database-folder "/tmp/maxmind"
-   :auto-update true
-   :auto-update-check-time (* 3 60 60 1000) ;; every 3 hours
-   :provider (atom nil)
-   :update-thread (atom nil)})
 
 
 (defn update-db! [{:keys [provider] :as config}]
@@ -257,75 +261,109 @@
        (let [new-provider (init (MaxMind2. newdb nil))]
          (if (compare-and-set! provider old-provider new-provider)
            (do
-             (when old-provider (close old-provider))
+             (when old-provider
+               (close old-provider)
+               (safely
+                (.delete (io/file current-db-file))
+                :on-error :default nil))
              (println "new db successfully installed."))
            (do
              (when new-provider (close new-provider))
+             (safely
+              (.delete (io/file newdb))
+              :on-error :default nil)
              (println "WARN the new db couldn't be loaded."))))))
 
    :on-error
-   :ignore true))
+   :default nil))
 
 
 (defn start-update-db-background-thread!
-  [{:keys [auto-update-check-time] :as config}]
-  (let [thread
+  [{:keys [auto-update-check-time update-thread] :as config}]
+  (let [stopped (atom false)
+        thread
         (Thread.
          (fn []
+           (println "background thread to update ip-geoloc db started!")
            (loop []
-             (println "background thread to update ip-geoloc db started!")
 
              (update-db! config)
 
              (sleep auto-update-check-time :+/- 0.20)
 
              ;; if the thread is interrupted then exit
-             (when-not (.isInterrupted (Thread/currentThread))
-               (recur))
-
-             (println "background thread to update ip-geoloc db stopped!")))
+             (when-not @stopped
+               (recur))))
          "ip-geoloc update thread")]
     (.start thread)
-    (fn [] (.interrupt thread))))
+    ;; return a function without params which
+    ;; when executed stop the thread
+    (let [t (fn []
+              (swap! stopped (constantly true))
+              (.interrupt thread)
+              (println "stopping auto-update thread")
+              (swap! update-thread (constantly nil)))]
+      (swap! update-thread (constantly t)))))
+
+
+
+(defn- normalize-config [config]
+  (as-> (merge defaults (into {} (filter second config))) $
+    (if (:database-file $) (assoc $ :auto-update false) $)))
+
+
+(defn start-maxmind [config]
+  (let [{:keys [database-file database-folder
+                auto-update provider
+                update-thread] :as cfg} (normalize-config config)]
+    (cond
+      ;; if already started do nothing
+      @provider cfg
+      ;; if a specific file has been chosen
+      ;; use that one with no update
+      database-file
+      (swap! provider (init (MaxMind2. database-file nil)))
+      ;; if a folder it is used then
+      ;; then we look for the last db available
+      database-folder
+      ;; checking if a db is already present
+      (let [lastdb (find-last-available-db cfg)]
+        (if lastdb
+          (swap! provider (constantly (init (MaxMind2. lastdb nil))))
+          ;; if not present download one
+          (swap! provider (constantly (init (MaxMind2. (update-db cfg) nil)))))
+        ;; if auto-update is enabled then start background thread
+        (when auto-update
+          (start-update-db-background-thread! cfg))))
+    cfg))
+
+
+(defn stop-maxmind [{:keys [provider update-thread] :as cfg}]
+  ;; stopping update thread
+  (@update-thread)
+  ;; stopping db
+  (close @provider)
+  ;; resetting reference
+  (swap! provider (constantly nil))
+  ;; updated state
+  cfg
+  )
+
 
 (comment
-
-  (def lastdb
-    (update-db {:database-url *database-url*
-                :database-md5-url *database-md5-url*
-                :database-folder  "/tmp/dir2"}))
-
-  (update-db-if-needed lastdb
-                       {:database-url *database-url*
-                        :database-md5-url *database-md5-url*
-                        :database-folder  "/tmp/dir2"})
-
 
   (def cfg {:database-file nil
             :database-folder "/tmp/maxmind"
             :auto-update true
-            :auto-update-check-time (* 3 1000) ;; every 3 hours
+            :auto-update-check-time (* 3 1000)
             :provider (atom nil)
             :update-thread (atom nil)
             :database-url *database-url*
             :database-md5-url *database-md5-url*
             })
 
+  (start-maxmind cfg)
 
-  (update-db! cfg)
+  (stop-maxmind cfg)
 
-  (database-location @(:provider cfg))
-
-  (def t (start-update-db-background-thread! cfg))
-
-  (t)
-
-  (update-db-if-needed nil
-                       cfg)
-
-
-  (def p (MaxMind2. "/tmp/maxmind/GeoLite2-City.mmdb.1442851935955.ok" nil))
-  (def p (init p))
-  (close p)
-  (database-location nil)
   )
