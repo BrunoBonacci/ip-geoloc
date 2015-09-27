@@ -34,7 +34,7 @@
      :country (->clojure (.getCountry data))
      :registered-country (->clojure (.getRegisteredCountry data))
      :represented-country (->clojure (.getRepresentedCountry data))
-     :subdivistions (->clojure (.getSubdivisions data))
+     :subdivisions (->clojure (.getSubdivisions data))
      :most-specific-subdivision (->clojure (.getMostSpecificSubdivision data))
      :least-specific-subdivision (->clojure (.getLeastSpecificSubdivision data))
      :city (->clojure (.getCity data))
@@ -172,7 +172,7 @@
         {:continent (:code continent)
          :countryIsoCode (:isoCode country)
          :country (:name country)
-         :subdivistions subdivs
+         :subdivisions subdivs
          :city (:name city)
          :postCode (:code postal)
          :latitude (:latitude location)

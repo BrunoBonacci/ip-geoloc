@@ -40,12 +40,12 @@ of choice. As you'll see this can be done automatically, the library
 takes care of downloading the latest copy of the database for you, but
 if you don't want the library download the DB automatically (maybe
 because the production environment doesn't have outbound internet
-connection) you can specify a local `db-file`.
+connection) you can specify a local `database-file`.
 
 
 ```Clojure
 ;; create a provider which point to the database you downloaded
-(def provider (create-provider {:db-file "/tmp/GeoLite2-City.mmdb"}))
+(def provider (create-provider {:database-file "/tmp/GeoLite2-City.mmdb"}))
 
 ;; start the provider and connect to the database
 (def provider (start provider))
@@ -150,7 +150,7 @@ You can also use the convenience functions which use the global `*provider*`.
 
 ```Clojure
 ;; initialize the provider
-(init-provider! {:db-file "/tmp/GeoLite2-City.mmdb"})
+(init-provider! {:database-file "/tmp/GeoLite2-City.mmdb"})
 
 ;; start it
 (start-provider!)
