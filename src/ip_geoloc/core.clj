@@ -3,6 +3,11 @@
             [ip-geoloc.maxmind :as mmind])
   (:import [ip_geoloc.maxmind MaxMind2]))
 
+;; TODO: code cleanup
+;; TODO: detect when another process is trying already to download
+;;       the db and wait for its completion
+;; FIXME: use system temp directory
+
 
 (def ^:dynamic *provider* nil)
 
