@@ -9,18 +9,13 @@
            [com.maxmind.geoip2.record City Continent
             Country Location Postal RepresentedCountry Subdivision Traits]))
 
-(def ^:dynamic *database-url* "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz")
-(def ^:dynamic *database-md5-url* "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.md5")
-(def defaults
+(def ^:const DEFAULTS
   {:database-file nil
    :database-folder "/tmp/maxmind"
    :auto-update true
    :auto-update-check-time (* 3 60 60 1000) ;; 3 hours
-   :provider (atom nil)
-   :update-thread (atom nil)
-   :database-url *database-url*
-   :database-md5-url *database-md5-url*
-   })
+   :database-url "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz"
+   :database-md5-url "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.md5"})
 
 (defprotocol ToClojure
   (->clojure [data] "convert a given object into a Clojure data structure"))
@@ -308,7 +303,10 @@
 
 
 (defn- normalize-config [config]
-  (as-> (merge defaults (into {} (filter second config))) $
+  (as-> (merge DEFAULTS
+               {:provider (atom nil)
+                :update-thread (atom nil)}
+               (into {} (filter second config))) $
     (if (:database-file $) (assoc $ :auto-update false) $)))
 
 
