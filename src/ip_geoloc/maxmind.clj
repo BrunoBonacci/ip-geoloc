@@ -350,18 +350,8 @@
 
 (comment
 
-  (def cfg {:database-file nil
-            :database-folder "/tmp/maxmind"
-            :auto-update true
-            :auto-update-check-time (* 3 1000)
-            :provider (atom nil)
-            :update-thread (atom nil)
-            :database-url *database-url*
-            :database-md5-url *database-md5-url*
-            })
+  (def c (start-maxmind {:auto-update-check-time (* 3 1000)}))
 
-  (start-maxmind cfg)
-
-  (stop-maxmind cfg)
+  (stop-maxmind c)
 
   )
