@@ -11,5 +11,4 @@
                  [com.maxmind.geoip2/geoip2 "2.8.0"]
                  [clj-http "3.4.1"]
                  [pandect "0.6.1"]
-                 [com.stuartsierra/component "0.2.3"]
                  [com.brunobonacci/safely "0.2.4"]])

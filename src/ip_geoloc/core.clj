@@ -1,6 +1,5 @@
 (ns ip-geoloc.core
-  (:require [com.stuartsierra.component :refer [start stop] :as component]
-            [ip-geoloc.maxmind :as mmind])
+  (:require [ip-geoloc.maxmind :as mmind])
   (:import [ip_geoloc.maxmind MaxMind2]))
 
 ;; TODO: code cleanup
@@ -12,39 +11,28 @@
 (def ^:dynamic *provider* nil)
 
 
-(defrecord Provider [database-file
-                     database-folder
-                     auto-update
-                     auto-update-check-time]
-  component/Lifecycle
-
-  (start [{:keys [provider] :as config}]
-    (if (some-> provider deref)
-      config
-      (map->Provider (mmind/start-maxmind config))))
-
-  (stop [{:keys [provider] :as config}]
-    (if (some-> provider deref)
-      (map->Provider (mmind/stop-maxmind config))
-      config)))
+(defn start-provider
+  ([]
+   (start-provider {}))
+  ([config]
+   (mmind/start-maxmind config)))
 
 
-(defn create-provider [config]
-  (map->Provider config))
+(defn stop-provider [provider]
+  (mmind/stop-maxmind provider))
 
 
-(defn init-provider! [config]
-  (alter-var-root #'*provider* (constantly (create-provider config))))
-
-
-(defn start-provider! []
-  (alter-var-root #'*provider*
-                  (constantly (start *provider*))))
+(defn start-provider!
+  ([]
+   (start-provider! {}))
+  ([config]
+   (alter-var-root #'*provider*
+                   (constantly (start-provider config)))))
 
 
 (defn stop-provider! []
   (alter-var-root #'*provider*
-                  (constantly (stop *provider*))))
+                  (constantly (stop-provider *provider*))))
 
 (defn full-geo-lookup
   ([ip]
@@ -73,16 +61,22 @@
   (def ip2 "104.131.115.133")
   (def ip3 "23.232.137.112")
 
-  (def prvd (create-provider {}))
-
-  (def prvd (start prvd))
+  (def prvd (start-provider {}))
 
   (geo-lookup prvd ip1)
   (geo-lookup prvd ip2)
   (geo-lookup prvd ip3)
 
-  (def prvd (stop prvd) )
+  (def prvd (stop-provider prvd) )
 
-  (mmind/stop-maxmind prvd)
+  (start-provider!)
+
+  (geo-lookup ip1)
+  (geo-lookup ip2)
+  (geo-lookup ip3)
+
+  (stop-provider!)
+
+
 
   )
