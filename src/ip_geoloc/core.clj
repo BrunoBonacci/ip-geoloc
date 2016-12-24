@@ -1,6 +1,5 @@
 (ns ip-geoloc.core
-  (:require [ip-geoloc.maxmind :as mmind])
-  (:import [ip_geoloc.maxmind MaxMind2]))
+  (:require [ip-geoloc.maxmind :as mmind]))
 
 ;; TODO: code cleanup
 ;; TODO: detect when another process is trying already to download
