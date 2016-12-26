@@ -11,6 +11,7 @@
 
 (def ^:const DEFAULTS
   {:database-file nil
+   ;; don't use System temp see issue #1
    :database-folder "/tmp/maxmind"
    :auto-update true
    :auto-update-check-time (* 3 60 60 1000) ;; 3 hours
