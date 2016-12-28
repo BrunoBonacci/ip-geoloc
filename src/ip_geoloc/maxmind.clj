@@ -9,6 +9,8 @@
            [com.maxmind.geoip2.record City Continent
             Country Location Postal RepresentedCountry Subdivision Traits]))
 
+
+
 (def ^:const DEFAULTS
   {:database-file nil
    ;; don't use System temp see issue #1
@@ -18,8 +20,11 @@
    :database-url "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz"
    :database-md5-url "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.md5"})
 
+
+
 (defprotocol ToClojure
   (->clojure [data] "convert a given object into a Clojure data structure"))
+
 
 
 (extend-protocol ToClojure
@@ -107,7 +112,8 @@
     (apply vector
            (doall (map ->clojure data))))
 
-)
+  )
+
 
 
 (defprotocol GeoIpProvider
@@ -128,6 +134,7 @@
 
   (database-location [this]
     "Returns the path of the current database"))
+
 
 
 (defmacro if-ip-exists [& body]
@@ -183,6 +190,7 @@
     db-path))
 
 
+
 (defn- gunzip-file [in out]
   (with-open [input (java.util.zip.GZIPInputStream.
                      (io/input-stream  (io/file in)))
@@ -190,8 +198,10 @@
     (io/copy input output)))
 
 
+
 (defn- ensure-dirs [path]
   (.mkdirs (.getParentFile (io/file path))))
+
 
 
 (defn download-db [from to]
@@ -199,6 +209,7 @@
   (io/copy
    (:body (http/get from {:as :stream}))
    (io/file to)))
+
 
 
 (defn check-db [md5 afile]
@@ -210,8 +221,10 @@
         :default nil))))
 
 
+
 (defn fetch-db-md5 [url]
   (:body (http/get url {:as :text})))
+
 
 
 (defn update-db [{:keys [database-url database-md5-url database-folder]}]
@@ -229,6 +242,7 @@
       (safely (.delete db) :on-error :default nil))))
 
 
+
 (defn find-last-available-db [{:keys [database-folder]}]
   (some->> (io/file database-folder)
            (.list)
@@ -239,9 +253,10 @@
 
 
 
-(defn update-db-if-needed [current-db-file
-                           {:keys [database-url database-md5-url
-                                   database-folder] :as cfg}]
+(defn update-db-if-needed
+  [current-db-file
+   {:keys [database-url database-md5-url
+           database-folder] :as cfg}]
   (when-not (check-db (fetch-db-md5 database-md5-url) current-db-file)
     (update-db cfg)))
 
@@ -272,6 +287,7 @@
 
    :on-error
    :default nil))
+
 
 
 (defn start-update-db-background-thread!
@@ -311,6 +327,7 @@
     (if (:database-file $) (assoc $ :auto-update false) $)))
 
 
+
 (defn start-maxmind [config]
   (let [{:keys [database-file database-folder
                 auto-update provider
@@ -337,6 +354,7 @@
     cfg))
 
 
+
 (defn stop-maxmind [{:keys [provider update-thread] :as cfg}]
   ;; stopping update thread
   (@update-thread)
@@ -346,13 +364,4 @@
   (swap! provider (constantly nil))
   ;; updated state
   cfg
-  )
-
-
-(comment
-
-  (def c (start-maxmind {:auto-update-check-time (* 3 1000)}))
-
-  (stop-maxmind c)
-
   )
