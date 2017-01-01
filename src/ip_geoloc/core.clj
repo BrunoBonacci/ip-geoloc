@@ -1,11 +1,6 @@
 (ns ip-geoloc.core
   (:require [ip-geoloc.maxmind :as mmind]))
 
-;; TODO: code cleanup
-;; TODO: detect when another process is trying already to download
-;;       the db and wait for its completion
-
-
 
 (def ^:dynamic *provider* nil)
 

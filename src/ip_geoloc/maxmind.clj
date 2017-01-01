@@ -206,9 +206,13 @@
 
 (defn download-db [from to]
   (ensure-dirs to)
-  (io/copy
-   (:body (http/get from {:as :stream}))
-   (io/file to)))
+  (safely
+   (io/copy
+    (:body (http/get from {:as :stream}))
+    (io/file to))
+   :on-error
+   :max-retry 5
+   :retry-delay [:random-exp-backoff :base 2 :+/- 0.5]))
 
 
 
