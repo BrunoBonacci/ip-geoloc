@@ -1,7 +1,5 @@
 # ip-geoloc
 
-**WORK IN PROGRESS**
-
 A Clojure library for IP geo-location.
 
 It wraps the MaxMind GeoLite2 and provide support for different levels of resolution.
@@ -26,7 +24,7 @@ It supports the following feature:
 
 Add the dependency in your `project.clj`
 
-    [com.brunobonacci/ip-geoloc "0.1.0-SNAPSHOT"]
+    [com.brunobonacci/ip-geoloc "0.2.0
 
 then require the namespace:
 
@@ -44,11 +42,8 @@ connection) you can specify a local `database-file`.
 
 
 ```Clojure
-;; create a provider which point to the database you downloaded
-(def provider (create-provider {:database-file "/tmp/GeoLite2-City.mmdb"}))
-
-;; start the provider and connect to the database
-(def provider (start provider))
+;; start the geo-ip provider and connect to the database
+(def provider (start-provider {:database-file "/tmp/GeoLite2-City.mmdb"}))
 
 ;; now you can start looking up for IPs in three formats
 
@@ -142,18 +137,15 @@ connection) you can specify a local `database-file`.
 
 
 ;; when you are done you can stop it
-(stop provider)
+(stop-provider provider)
 
 ```
 
 You can also use the convenience functions which use the global `*provider*`.
 
 ```Clojure
-;; initialize the provider
-(init-provider! {:database-file "/tmp/GeoLite2-City.mmdb"})
-
 ;; start it
-(start-provider!)
+(start-provider!) ;; default config
 
 ;; now you can resolve the IP in the same way
 ;; without having to pass the provider
@@ -173,22 +165,38 @@ You can also use the convenience functions which use the global `*provider*`.
 
 ```
 
-### Using with Component library
+## Configuration
 
-The provider is initialized with
-[Stuart Sierra's Component](https://github.com/stuartsierra/component)
-library, therefore if you want you can include the provider component
-in your system map:
+Here the possible configuration options:
 
-```Clojure
-(defn your-system [config-options]
-  (let [{:keys [host port]} config-options]
-    (component/system-map
-      :db (new-database host port)
-      :geo-ip (create-provider config-options))))
+``` clojure
+  {;; location of the "GeoLite2-City.mmdb" database
+   ;; if not specified the system will download the latest
+   :database-file nil
+
+   ;; when `:database-file` is not specified ip-geoloc
+   ;; will attempt to download the latest database from the MaxMind website
+   ;; This is the folder which must be writable where to store the
+   ;; downloaded database.
+   :database-folder "/tmp/maxmind"
+
+   ;; whether or not the ip-geoloc must start a background thread
+   ;; which attempt to check the presence of a new database
+   ;; and download it
+   :auto-update true
+
+   ;; If `:auto-update` is true then how often the thread
+   ;; must check for availability of a new database.
+   ;; The time is expressed in milliseconds and it is
+   ;; randomised.
+   :auto-update-check-time (* 3 60 60 1000) ;; 3 hours
+
+   ;; The MaxMind url for the database
+   :database-url "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz"
+
+   ;; The url of the MD5 signature to verify the database integrity
+   :database-md5-url "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.md5"}
 ```
-
-The provider component will respect the start/stop lifecycle.
 
 ## License
 

@@ -12,12 +12,31 @@
 
 
 (def ^:const DEFAULTS
-  {:database-file nil
-   ;; don't use System temp see issue #1
+  {;; location of the "GeoLite2-City.mmdb" database
+   ;; if not specified the system will download the latest
+   :database-file nil
+
+   ;; when `:database-file` is not specified ip-geoloc
+   ;; will attempt to download the latest database from the MaxMind website
+   ;; This is the folder which must be writable where to store the
+   ;; downloaded database.
    :database-folder "/tmp/maxmind"
+
+   ;; whether or not the ip-geoloc must start a background thread
+   ;; which attempt to check the presence of a new database
+   ;; and download it
    :auto-update true
+
+   ;; If `:auto-update` is true then how often the thread
+   ;; must check for availability of a new database.
+   ;; The time is expressed in milliseconds and it is
+   ;; randomised.
    :auto-update-check-time (* 3 60 60 1000) ;; 3 hours
+
+   ;; The MaxMind url for the database
    :database-url "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz"
+
+   ;; The url of the MD5 signature to verify the database integrity
    :database-md5-url "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.md5"})
 
 
