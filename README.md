@@ -24,7 +24,7 @@ It supports the following feature:
 
 Add the dependency in your `project.clj`
 
-    [com.brunobonacci/ip-geoloc "0.2.0
+    [com.brunobonacci/ip-geoloc "0.2.0"]
 
 then require the namespace:
 
