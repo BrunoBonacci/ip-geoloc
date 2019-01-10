@@ -318,7 +318,7 @@
   (let [stopped (atom false)
         thread
         (Thread.
-         (fn []
+         (bound-fn []
            (println "background thread to update ip-geoloc db started!")
            (loop []
 
