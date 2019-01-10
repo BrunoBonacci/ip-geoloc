@@ -1,4 +1,4 @@
-(defproject com.brunobonacci/ip-geoloc "0.2.0"
+(defproject com.brunobonacci/ip-geoloc "0.2.1"
   :description "A fully automated Clojure library for IP GeoLocation"
   :url "https://github.com/BrunoBonacci/ip-geoloc"
 
@@ -11,4 +11,5 @@
                  [com.maxmind.geoip2/geoip2 "2.8.0"]
                  [clj-http "3.4.1"]
                  [pandect "0.6.1"]
-                 [com.brunobonacci/safely "0.2.4"]])
+                 [com.brunobonacci/safely "0.5.0-alpha5"]
+                 [org.clojure/tools.logging "0.4.1"]])

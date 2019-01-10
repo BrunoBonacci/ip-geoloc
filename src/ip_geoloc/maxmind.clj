@@ -1,6 +1,7 @@
 (ns ip-geoloc.maxmind
   (:require [clojure.java.io :as io]
-            [safely.core :refer [safely sleep]])
+            [safely.core :refer [safely sleep]]
+            [clojure.tools.logging :as log])
   (:require [pandect.algo.md5 :as hash])
   (:require [clj-http.client :as http])
   (:import com.maxmind.geoip2.DatabaseReader$Builder
@@ -291,7 +292,7 @@
          current-db-file (when old-provider (database-location old-provider))
          newdb (update-db-if-needed current-db-file config)]
      (when newdb
-       (println "A new ip-geoloc db has been found:" newdb)
+       (log/info "A new ip-geoloc MaxMind db has been found:" newdb)
        (let [new-provider (init (MaxMind2. newdb nil))]
          (if (compare-and-set! provider old-provider new-provider)
            (do
@@ -300,13 +301,13 @@
                (safely
                 (.delete (io/file current-db-file))
                 :on-error :default nil))
-             (println "new db successfully installed."))
+             (log/info "New MaxMind db successfully installed."))
            (do
              (when new-provider (close new-provider))
              (safely
               (.delete (io/file newdb))
               :on-error :default nil)
-             (println "WARN the new db couldn't be loaded."))))))
+             (log/warn "The new MaxMind db couldn't be loaded."))))))
 
    :on-error
    :default nil))
@@ -319,7 +320,7 @@
         thread
         (Thread.
          (fn []
-           (println "background thread to update ip-geoloc db started!")
+           (log/info "Background thread to update ip-geoloc MaxMind db started!")
            (loop []
 
              (update-db! config)
@@ -336,7 +337,7 @@
     (let [t (fn []
               (swap! stopped (constantly true))
               (.interrupt thread)
-              (println "stopping auto-update thread")
+              (log/info "stopping auto-update thread.")
               (swap! update-thread (constantly nil)))]
       (swap! update-thread (constantly t)))))
 
