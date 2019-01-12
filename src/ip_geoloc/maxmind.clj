@@ -362,7 +362,7 @@
       ;; if a specific file has been chosen
       ;; use that one with no update
       database-file
-      (swap! provider (init (MaxMind2. database-file nil)))
+      (swap! provider (constantly (init (MaxMind2. database-file nil))))
       ;; if a folder it is used then
       ;; then we look for the last db available
       database-folder
