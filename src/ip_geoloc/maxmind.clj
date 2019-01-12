@@ -381,9 +381,10 @@
 
 (defn stop-maxmind [{:keys [provider update-thread] :as cfg}]
   ;; stopping update thread
-  (@update-thread)
+  (when-let [ut (some-> update-thread deref)]
+    (ut))
   ;; stopping db
-  (close @provider)
+  (some-> provider deref close)
   ;; resetting reference
   (swap! provider (constantly nil))
   ;; updated state
