@@ -232,7 +232,7 @@
     (io/file to))
    :on-error
    :max-retry 5
-   :retry-delay [:random-exp-backoff :base 2 :+/- 0.5]))
+   :retry-delay [:random-exp-backoff :base 200 :+/- 0.5]))
 
 
 
