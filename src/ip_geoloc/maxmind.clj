@@ -35,10 +35,10 @@
    :auto-update-check-time (* 3 60 60 1000) ;; 3 hours
 
    ;; The MaxMind url for the database
-   :database-url "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz"
+   :database-url "https://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz"
 
    ;; The url of the MD5 signature to verify the database integrity
-   :database-md5-url "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.md5"})
+   :database-md5-url "https://geolite.maxmind.com/download/geoip/database/GeoLite2-City.md5"})
 
 
 
