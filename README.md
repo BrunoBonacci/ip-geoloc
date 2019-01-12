@@ -1,6 +1,6 @@
 # ip-geoloc
 
-A Clojure library for IP geo-location.
+A fully automated Clojure library for IP geo-location.
 
 It wraps the MaxMind GeoLite2 and provide support for different levels of resolution.
 
@@ -17,8 +17,10 @@ It supports the following feature:
   * IPv4 and IPv6 support
   * 3 levels of output details: just lat/lng coordinates, concise, full.
   * Simplified database update
-  * Fully automated database update
-  * caching of common IPs
+  * Fully automated database update (**it checks and downloads updated
+    IP databases with atomic updates, great for long running
+    systems**)
+  * caching of frequently searched IPs
 
 ## Usage
 
