@@ -24,7 +24,9 @@ It supports the following feature:
 
 Add the dependency in your `project.clj`
 
-    [com.brunobonacci/ip-geoloc "0.2.2"]
+    [com.brunobonacci/ip-geoloc "0.2.3"]
+
+Check latest version here: [![Clojars Project](https://img.shields.io/clojars/v/com.brunobonacci/ip-geoloc.svg)](https://clojars.org/com.brunobonacci/ip-geoloc)
 
 then require the namespace:
 
