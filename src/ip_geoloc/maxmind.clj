@@ -251,10 +251,13 @@
 
 
 
-(defn update-db [{:keys [database-url database-md5-url database-folder]}]
+(defn update-db [{:keys [database-url database-md5-url database-folder]
+                  ::keys [initial?]}]
   (let [dbgz (io/file database-folder "GeoLite2-City.mmdb.gz")
         db   (io/file database-folder
-                      (str "GeoLite2-City.mmdb." (System/currentTimeMillis)))]
+                      (str "GeoLite2-City.mmdb." (if initial?
+                                                   0
+                                                   (System/currentTimeMillis))))]
     (download-db database-url dbgz)
     (gunzip-file dbgz db)
     (if (check-db (fetch-db-md5 database-md5-url) db)
