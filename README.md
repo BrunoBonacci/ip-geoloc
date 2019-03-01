@@ -176,6 +176,11 @@ Here the possible configuration options:
 ``` clojure
   {;; location of the "GeoLite2-City.mmdb" database
    ;; if not specified the system will download the latest
+   ;; If it is specified and the `:auto-update` is set to `true`
+   ;; this database will be used as initial database and in
+   ;; background a new version will be downloaded.
+   ;; Note: you can specify a resource as well.
+   ;; example: `(io/resource "sample.mmdb")`
    :database-file nil
 
    ;; when `:database-file` is not specified ip-geoloc
@@ -201,6 +206,21 @@ Here the possible configuration options:
    ;; The url of the MD5 signature to verify the database integrity
    :database-md5-url "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.md5"}
 ```
+
+Example of three different config:
+
+```Clojure
+;; Download the latest database and automatically update it when new one comes available.
+;; Store the database in the given folder.
+(start-provider! {:database-folder "/var/lib/share/maxmind/"})
+
+;; Use the specified file and disable auto update
+(start-provider! {:database-file "/filesystem/path/GeoLite2-City.mmdb" :auto-update false})
+
+;; Use the specified file as initial database but update it in the background
+(start-provider! {:database-file (io/resource "initial-GeoLite2-City.mmdb")})
+```
+
 
 ## License
 

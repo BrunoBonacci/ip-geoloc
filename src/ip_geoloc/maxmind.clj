@@ -15,6 +15,11 @@
 (def ^:const DEFAULTS
   {;; location of the "GeoLite2-City.mmdb" database
    ;; if not specified the system will download the latest
+   ;; If it is specified and the `:auto-update` is set to `true`
+   ;; this database will be used as initial database and in
+   ;; background a new version will be downloaded.
+   ;; Note: you can specify a resource as well.
+   ;; example: `(io/resource "sample.mmdb")`
    :database-file nil
 
    ;; when `:database-file` is not specified ip-geoloc
@@ -343,12 +348,14 @@
 
 
 
-(defn- normalize-config [config]
+(defn- normalize-config
+  [config]
   (as-> (merge DEFAULTS
                {:provider (atom nil)
                 :update-thread (atom nil)}
-               (into {} (filter second config))) $
-    (if (:database-file $) (assoc $ :auto-update false) $)))
+               (into {} (remove (comp nil? second) config))) $
+    ;; if no database file is specified force auto-update.
+    (if-not (:database-file $) (assoc $ :auto-update true) $)))
 
 
 
@@ -356,16 +363,18 @@
   (let [{:keys [database-file database-folder
                 auto-update provider
                 update-thread] :as cfg} (normalize-config config)]
-    (cond
-      ;; if already started do nothing
-      @provider cfg
+
+    ;; if already started do nothing
+    (when-not @provider
+
       ;; if a specific file has been chosen
-      ;; use that one with no update
-      database-file
-      (swap! provider (constantly (init (MaxMind2. database-file nil))))
-      ;; if a folder it is used then
+      ;; use that one as initial database
+      (when database-file
+        (io/copy (io/input-stream database-file)
+                 (io/file (str database-folder "/GeoLite2-City.mmdb."
+                               (System/currentTimeMillis) ".ok"))))
+
       ;; then we look for the last db available
-      database-folder
       ;; checking if a db is already present
       (let [lastdb (find-last-available-db cfg)]
         (if lastdb
@@ -388,5 +397,4 @@
   ;; resetting reference
   (swap! provider (constantly nil))
   ;; updated state
-  cfg
-  )
+  cfg)

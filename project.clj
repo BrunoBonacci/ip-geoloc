@@ -1,4 +1,4 @@
-(defproject com.brunobonacci/ip-geoloc "0.2.3"
+(defproject com.brunobonacci/ip-geoloc "0.3.0-SNAPSHOT"
   :description "A fully automated Clojure library for IP GeoLocation"
   :url "https://github.com/BrunoBonacci/ip-geoloc"
 

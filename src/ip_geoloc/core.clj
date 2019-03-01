@@ -61,7 +61,7 @@
   (geo-lookup prvd ip2)
   (geo-lookup prvd ip3)
 
-  (def prvd (stop-provider prvd) )
+  (def prvd (stop-provider prvd))
 
   (start-provider!)
 
@@ -70,7 +70,5 @@
   (geo-lookup ip3)
 
   (stop-provider!)
-
-
 
   )
