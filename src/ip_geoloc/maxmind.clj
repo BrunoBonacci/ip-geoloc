@@ -236,7 +236,7 @@
     (:body (http/get from {:as :stream}))
     (io/file to))
    :on-error
-   :max-retry 5
+   :max-retries 5
    :retry-delay [:random-exp-backoff :base 200 :+/- 0.5]))
 
 

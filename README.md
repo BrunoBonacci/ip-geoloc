@@ -2,6 +2,8 @@
 
 A fully automated Clojure library for IP geo-location.
 
+NOTE: [MaxMind now requires user registration for GeoLite database download](https://blog.maxmind.com/2019/12/18/significant-changes-to-accessing-and-using-geolite2-databases/)
+
 It wraps the MaxMind GeoLite2 and provide support for different levels of resolution.
 
 The MaxMind GeoLite2 database is available here: http://dev.maxmind.com/geoip/geoip2/geolite2/
